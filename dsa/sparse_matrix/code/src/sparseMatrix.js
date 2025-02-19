@@ -32,4 +32,80 @@ class SparseMatrix {
             process.exit(1);
         }
     }
+
+    setElement(row, col, value) {
+        const key = `${row},${col}`;
+        if (value !== 0) {
+            this.matrix.set(key, value);
+        } else {
+            this.matrix.delete(key);
+        }
+    }
+
+    getElement(row, col) {
+        return this.matrix.get(`${row},${col}`) || 0;
+    }
+
+    add(other) {
+        if (this.rows !== other.rows || this.cols !== other.cols) {
+            throw new Error("Matrix dimensions must match for addition.");
+        }
+        const result = new SparseMatrix();
+        result.rows = this.rows;
+        result.cols = this.cols;
+        
+        for (const [key, value] of this.matrix) {
+            result.setElement(...key.split(',').map(Number), value);
+        }
+        for (const [key, value] of other.matrix) {
+            const [row, col] = key.split(',').map(Number);
+            result.setElement(row, col, result.getElement(row, col) + value);
+        }
+        return result;
+    }
+    
+    subtract(other) {
+        if (this.rows !== other.rows || this.cols !== other.cols) {
+            throw new Error("Matrix dimensions must match for subtraction.");
+        }
+        
+        const result = new SparseMatrix();
+        result.rows = this.rows;
+        result.cols = this.cols;
+        
+        for (const [key, value] of this.matrix) {
+            result.setElement(...key.split(',').map(Number), value);
+        }
+        
+        for (const [key, value] of other.matrix) {
+            const [row, col] = key.split(',').map(Number);
+            result.setElement(row, col, result.getElement(row, col) - value);
+        }
+        
+        return result;
+    }
+    
+    multiply(other) {
+        if (this.cols !== other.rows) {
+            throw new Error("Matrix multiplication not possible: dimensions do not match");
+        }
+        
+        const result = new SparseMatrix();
+        result.rows = this.rows;
+        result.cols = other.cols;
+        
+        for (const [key, value] of this.matrix) {
+            const [row, col] = key.split(',').map(Number);
+            
+            for (let k = 0; k < other.cols; k++) {
+                const otherValue = other.getElement(col, k);
+                if (otherValue !== 0) {
+                    result.setElement(row, k, result.getElement(row, k) + value * otherValue);
+                }
+            }
+        }
+        
+        return result;
+    }
+
 }
