@@ -108,4 +108,44 @@ class SparseMatrix {
         return result;
     }
 
+    const readline = require('readline').createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    
+    readline.question('Choose operation: (1) Add, (2) Subtract, (3) Multiply: ', (operation) => {
+        // Load sample files
+        const sampleInputsDir = path.join(__dirname, '../../sample_inputs/');
+        const txtFiles = fs.readdirSync(sampleInputsDir).filter(file => file.endsWith('.txt'));
+    
+        if (txtFiles.length < 2) {
+            console.error("Error: Not enough .txt files in /sample_inputs/ folder.");
+            process.exit(1);
+        }
+    
+        const file1 = path.join(sampleInputsDir, txtFiles[0]);
+        const file2 = path.join(sampleInputsDir, txtFiles[1]);
+    
+        const matrix1 = new SparseMatrix(file1);
+        const matrix2 = new SparseMatrix(file2);
+    
+        let result;
+        try {
+            if (operation === '1') {
+                result = matrix1.add(matrix2);
+            } else if (operation === '2') {
+                result = matrix1.subtract(matrix2);
+            } else if (operation === '3') {
+                result = matrix1.multiply(matrix2);
+            } else {
+                throw new Error("Invalid option selected!");
+            }
+            fs.writeFileSync(path.join(sampleInputsDir, 'result.txt'), result.toString(), 'utf8');
+            console.log("Result saved.");
+        } catch (error) {
+            console.error("Error:", error.message);
+        }
+        readline.close();
+    });
+    
 }
